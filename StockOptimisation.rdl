@@ -1,0 +1,36 @@
+MEMBER [Measures].[Discrepancy] AS (([Measures].[Quantity On Hand]-[Measures].[Last Stocktake Quantity])*100)/[Last Stocktake Quantity] MEMBER [Measures].[DiscrepancyStatus] 
+AS IIF([Measures].[Discrepancy]&gt;5, "Overstocked",IIF( [Measures].[Discrepancy]&lt;-5, "Understocked",  "Within +-5%" )) 
+
+MEMBER [Measures].[LeadTimeSortOrder] AS 
+    CASE [Stock Item].[Lead Time Days].CurrentMember.Name
+        WHEN "0 - 7" THEN 1
+        WHEN "12 - 20" THEN 2
+        ELSE 0
+   END
+
+SET [FilteredSet] AS
+FILTER(
+  (
+    [Stock Item].[Stock Item].[Stock Item].ALLMEMBERS *
+    STRTOSET(@LeadTimeParam, CONSTRAINED) *
+    [Stock Item].[Unit Price].[Unit Price].ALLMEMBERS
+  ),
+  ABS([Measures].[Discrepancy])> 5
+)
+SELECT 
+NON EMPTY { 
+[Measures].[DiscrepancyStatus], 
+[Measures].[LeadTimeSortOrder],
+[Measures].[Last Cost Price], 
+[Measures].[Target Stock Level], 
+[Measures].[Reorder Level], 
+[Measures].[Quantity On Hand], 
+[Measures].[Last Stocktake Quantity], 
+[Measures].[Discrepancy] } 
+ON COLUMNS, 
+
+NON EMPTY [FilteredSet] ON ROWS
+
+
+FROM [Wide World Importers] 
+CELL PROPERTIES VALUE, BACK_COLOR, FORE_COLOR, FORMATTED_VALUE, FORMAT_STRING, FONT_NAME, FONT_SIZE, FONT_FLAGS
