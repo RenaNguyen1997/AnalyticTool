@@ -1,3 +1,4 @@
+WITH
 MEMBER [Measures].[Discrepancy] AS (([Measures].[Quantity On Hand]-[Measures].[Last Stocktake Quantity])*100)/[Last Stocktake Quantity] MEMBER [Measures].[DiscrepancyStatus] 
 AS IIF([Measures].[Discrepancy]&gt;5, "Overstocked",IIF( [Measures].[Discrepancy]&lt;-5, "Understocked",  "Within +-5%" )) 
 
