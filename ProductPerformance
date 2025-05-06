@@ -6,12 +6,6 @@ MEMBER [Measures].[Discrepancy] AS
 MEMBER [Measures].[StockDiscrepancyStatus] AS 
     IIF([Measures].[Discrepancy] > 5, "Overstocked",
         IIF([Measures].[Discrepancy] < -5, "Understocked", "Within ±5%"))
-SET [TopProducts] AS 
-  TOPCOUNT(
-    [Stock Item].[Stock Item].[Stock Item].MEMBERS,
-    10, 
-    [Measures].[Sales Profit]	
-  )
 select {
 	[Measures].[Sales Quantity],
 	[Measures].[Sales Profit],
@@ -20,7 +14,7 @@ select {
 	} ON COLUMNS, 
 
 	NON EMPTY (
-	[TopProducts]	
+	[Stock Item].[Stock Item].[Stock Item].MEMBERS	
 	) ON ROWS
 
 FROM [Wide World Importers]
