@@ -1,0 +1,21 @@
+WITH 
+MEMBER [Measures].[Discrepancy] AS 
+    (([Measures].[Quantity On Hand] - [Measures].[Last Stocktake Quantity]) * 100) 
+    / IIF([Measures].[Last Stocktake Quantity] = 0, NULL, [Measures].[Last Stocktake Quantity])
+
+MEMBER [Measures].[StockDiscrepancyStatus] AS 
+    IIF([Measures].[Discrepancy] > 5, "Overstocked",
+        IIF([Measures].[Discrepancy] < -5, "Understocked", "Within ±5%"))
+select {
+	[Measures].[Sales Quantity],
+	[Measures].[Sales Profit],
+	[Measures].[Sales Total Including Tax],
+	[Measures].[StockDiscrepancyStatus]
+	} ON COLUMNS, 
+
+	NON EMPTY (
+	[Stock Item].[Stock Item].[Stock Item].MEMBERS	
+	) ON ROWS
+
+FROM [Wide World Importers]
+WHERE ([Transaction Date].[Calendar].[Quarter].[2016].[Q3])
